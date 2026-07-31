@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sector, Segmento, Cono y Cilindro - 1° Medio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --morado1:#6a3fb5; --morado2:#9b59b6; --morado3:#c39bd3;
+    --rosa:#e91e8c; --amarillo:#ffc837; --verde:#27ae60; --rojo:#e74c3c; --azul:#2980b9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI', Verdana, sans-serif;
+    background:linear-gradient(135deg,var(--morado1),var(--rosa) 60%, var(--amarillo) 130%);
+    background-attachment:fixed; min-height:100vh; color:#2c1a4d;
+  }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 22px; background:rgba(255,255,255,0.95);
+    box-shadow:0 3px 12px rgba(0,0,0,0.25); position:sticky; top:0; z-index:100;
+    flex-wrap:wrap; gap:8px;
+  }
+  .topbar h1{font-size:1.05rem; margin:0; color:var(--morado1);}
+  .topbar h1 span{color:var(--rosa);}
+  #timer{font-weight:bold; font-size:1.3rem; background:var(--morado1); color:white; padding:6px 16px; border-radius:20px;}
+  #timer.warn{background:var(--rojo);}
+  .navbar{display:flex; flex-wrap:wrap; gap:5px; padding:10px 18px; background:rgba(255,255,255,0.8); justify-content:center;}
+  .navbtn{border:none; background:white; color:var(--morado1); font-weight:600; padding:7px 10px; border-radius:8px; cursor:pointer; font-size:0.72rem; box-shadow:0 2px 5px rgba(0,0,0,0.15);}
+  .navbtn:hover{background:var(--morado3); color:white;}
+  .navbtn.active{background:var(--rosa); color:white;}
+  .container{max-width:980px; margin:20px auto 60px; padding:0 16px;}
+  .card{background:white; border-radius:16px; padding:26px 30px; margin-bottom:22px; box-shadow:0 8px 24px rgba(0,0,0,0.2); display:none;}
+  .card.show{display:block;}
+  h2{color:var(--morado1); border-bottom:3px solid var(--amarillo); padding-bottom:8px;}
+  h3{color:var(--rosa);}
+  .basico{background:#eef7ff; border-left:6px solid var(--azul); padding:14px 18px; border-radius:10px; margin:14px 0;}
+  .recordatorio{background:#fff8e1; border:2px solid var(--amarillo); border-radius:10px; padding:10px 16px; margin:12px 0; font-weight:600; text-align:center;}
+  .formula-box{background:linear-gradient(135deg,#f4e9ff,#ffe9f5); border-left:6px solid var(--morado1); padding:14px 18px; border-radius:10px; margin:14px 0; font-size:1.1rem; text-align:center;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;}}
+  .calc-box{background:#faf7ff; border:2px dashed var(--morado3); border-radius:12px; padding:16px;}
+  .calc-box label{display:block; margin:8px 0 4px; font-weight:600;}
+  .calc-box input{width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; font-size:1rem;}
+  .btn{background:var(--morado1); color:white; border:none; padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:600; margin-top:10px;}
+  .btn:hover{background:var(--rosa);}
+  .result-box{margin-top:12px; padding:12px; border-radius:10px; background:#eafaf1; border:2px solid var(--verde); font-weight:600; display:none;}
+  svg{display:block; margin:0 auto;}
+  .ex-item{border:1px solid #e0d4f5; border-radius:12px; padding:14px 18px; margin:14px 0; background:#fdfbff;}
+  .ex-item .pregunta{font-weight:600; margin-bottom:8px;}
+  .reveal-btn{background:var(--amarillo); color:#5a3d00; border:none; padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600; margin-top:6px;}
+  .solucion{display:none; margin-top:10px; background:#fff8e1; border-left:4px solid var(--amarillo); padding:10px 14px; border-radius:8px;}
+  .solucion.show{display:block;}
+  .solucion ol{margin:0; padding-left:20px;}
+  .solucion li{margin-bottom:6px;}
+  .nav-buttons{display:flex; justify-content:space-between; margin-top:20px;}
+  .prevnext{background:var(--morado2); color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;}
+  .prevnext:hover{background:var(--morado1);}
+  .prevnext:disabled{opacity:0.4; cursor:not-allowed;}
+  .quiz-q{background:#faf7ff; border-radius:12px; padding:14px 18px; margin:14px 0; border:1px solid #e0d4f5;}
+  .quiz-q p.q-title{font-weight:700; margin-bottom:8px;}
+  .opciones label{display:block; background:white; border:1px solid #ddd; border-radius:8px; padding:8px 12px; margin:6px 0; cursor:pointer;}
+  .opciones label:hover{background:#f0e6ff;}
+  .opciones input{margin-right:8px;}
+  .opciones label.correcta{background:#d4f7dc; border-color:var(--verde);}
+  .opciones label.incorrecta{background:#fddede; border-color:var(--rojo);}
+  .chequeo-box{background:#fff9ec; border:2px solid var(--amarillo); border-radius:12px; padding:16px; margin-top:16px;}
+  .chequeo-box h4{margin-top:0; color:#a5720a;}
+  .resultado-chequeo{font-weight:600; margin-top:10px;}
+  #testResultado{text-align:center; padding:24px; border-radius:14px; display:none;}
+  .nota-grande{font-size:3rem; font-weight:bold;}
+  .progressbar{height:10px; background:#eee; border-radius:5px; overflow:hidden; margin-bottom:6px;}
+  .progressbar-fill{height:100%; background:linear-gradient(90deg,var(--morado1),var(--rosa)); width:0%; transition:width .4s;}
+  .hint{font-size:0.85rem; color:#555;}
+  table.tabla-formulas{width:100%; border-collapse:collapse; margin:14px 0;}
+  table.tabla-formulas th, table.tabla-formulas td{border:1px solid #e0d4f5; padding:9px; text-align:center; font-size:0.92rem;}
+  table.tabla-formulas th{background:var(--morado3); color:white;}
+  ul.repaso li{margin-bottom:6px;}
+  table.tabla-seno{width:100%; border-collapse:collapse; margin:10px 0;}
+  table.tabla-seno th, table.tabla-seno td{border:1px solid #e0d4f5; padding:8px; text-align:center;}
+  table.tabla-seno th{background:var(--azul); color:white;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>⭕ Sector, Segmento, Cono y Cilindro — 1° Medio</h1>
+  <div id="timer">120:00</div>
+</div>
+
+<div class="navbar" id="navbar"></div>
+
+<div class="container">
+
+<!-- 0: CÍRCULO BÁSICO -->
+<div class="card" id="s0">
+  <h2>1️⃣ Lo más básico: el círculo</h2>
+  <div class="basico">
+    <p>Un <strong>círculo</strong> es una figura redonda plana.</p>
+    <p>Estas son sus partes:</p>
+    <ul class="repaso">
+      <li><strong>Centro (O):</strong> es el punto exacto en la mitad del círculo.</li>
+      <li><strong>Radio (r):</strong> es la distancia entre el centro y el borde del círculo.</li>
+      <li><strong>Diámetro:</strong> es el doble del radio. Fórmula: diámetro = 2 × r.</li>
+      <li><strong>Circunferencia:</strong> es el borde completo del círculo. Su longitud se calcula así: circunferencia = 2 × π × r.</li>
+      <li><strong>Área del círculo:</strong> es el espacio dentro del círculo. Fórmula: área = π × r².</li>
+    </ul>
+  </div>
+
+  <div class="recordatorio">
+    📌 Importante: en toda esta guía vamos a usar π (pi) = 3.<br>
+    Cada vez que veas la letra π, la reemplazas por el número 3.
+  </div>
+
+  <svg width="220" height="220" viewBox="0 0 220 220">
+    <circle cx="110" cy="110" r="90" fill="#f4e9ff" stroke="var(--morado1)" stroke-width="3"/>
+    <line x1="110" y1="110" x2="200" y2="110" stroke="var(--rosa)" stroke-width="3"/>
+    <circle cx="110" cy="110" r="4" fill="var(--morado1)"/>
+    <text x="150" y="103" font-size="13" fill="var(--rosa)" font-weight="bold">r</text>
+    <line x1="20" y1="110" x2="200" y2="110" stroke="var(--azul)" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="55" y="130" font-size="13" fill="var(--azul)" font-weight="bold">diámetro</text>
+  </svg>
+
+  <h3>Ejemplo paso a paso</h3>
+  <div class="ex-item">
+    <p class="pregunta">Un círculo tiene radio 4 cm. Calcula su circunferencia.</p>
+    <button class="reveal-btn" onclick="toggleSol('sol-circ')">Ver los pasos</button>
+    <div class="solucion" id="sol-circ">
+      <ol>
+        <li>La fórmula es: circunferencia = 2 × π × r</li>
+        <li>Reemplazamos π por 3 y r por 4: circunferencia = 2 × 3 × 4</li>
+        <li>Multiplicamos: 2 × 3 × 4 = 24</li>
+        <li>Respuesta: <strong>24 cm</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco (esto no tiene nota, es solo para practicar)</h4>
+    <div class="quiz-q">
+      <p class="q-title">1. Si el radio mide 5 cm, ¿cuánto mide el diámetro?</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c0-1" value="0">2,5 cm</label>
+        <label><input type="radio" name="c0-1" value="1">10 cm</label>
+        <label><input type="radio" name="c0-1" value="2">15 cm</label>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p class="q-title">2. La fórmula del área del círculo es:</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c0-2" value="0">2 × π × r</label>
+        <label><input type="radio" name="c0-2" value="1">π × r²</label>
+        <label><input type="radio" name="c0-2" value="2">π × r</label>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p class="q-title">3. Un círculo tiene radio 4 cm. Usando π = 3, ¿cuánto mide su circunferencia?</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c0-3" value="0">8 cm</label>
+        <label><input type="radio" name="c0-3" value="1">24 cm</label>
+        <label><input type="radio" name="c0-3" value="2">16 cm²</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c0-1','c0-2','c0-3'],'res0')">Revisar mis respuestas</button>
+    <p class="resultado-chequeo" id="res0"></p>
+  </div>
+</div>
+
+<!-- 1: ÁNGULO Y ARCO -->
+<div class="card" id="s1">
+  <h2>2️⃣ Ángulo central y arco</h2>
+  <div class="basico">
+    <p>El <strong>ángulo central (θ)</strong> es el ángulo que se forma en el centro O, entre dos radios.</p>
+    <p>Ese ángulo marca un pedazo del borde del círculo. Ese pedazo del borde se llama <strong>arco</strong>.</p>
+  </div>
+  <div class="recordatorio">Recuerda: π = 3 en toda esta guía.</div>
+  <div class="formula-box">Longitud del arco: L = (θ ÷ 360) × 2 × π × r</div>
+
+  <h3>Ejemplo paso a paso</h3>
+  <div class="ex-item">
+    <p class="pregunta">Radio 4 cm, ángulo central 90°. ¿Cuánto mide el arco?</p>
+    <button class="reveal-btn" onclick="toggleSol('sol-arco')">Ver los pasos</button>
+    <div class="solucion" id="sol-arco">
+      <ol>
+        <li>Fórmula: L = (θ ÷ 360) × 2 × π × r</li>
+        <li>Reemplazamos los valores: L = (90 ÷ 360) × 2 × 3 × 4</li>
+        <li>90 ÷ 360 = 0,25</li>
+        <li>2 × 3 × 4 = 24</li>
+        <li>0,25 × 24 = 6</li>
+        <li>Respuesta: <strong>6 cm</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">1. Radio 6 cm, ángulo 180° (media vuelta). ¿Cuánto mide el arco?</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c1-1" value="0">9 cm</label>
+        <label><input type="radio" name="c1-1" value="1">18 cm</label>
+        <label><input type="radio" name="c1-1" value="2">36 cm</label>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p class="q-title">2. Radio 10 cm, ángulo 36°. ¿Cuánto mide el arco?</p>
+      <div class="opciones" data-correct="0">
+        <label><input type="radio" name="c1-2" value="0">6 cm</label>
+        <label><input type="radio" name="c1-2" value="1">12 cm</label>
+        <label><input type="radio" name="c1-2" value="2">3 cm</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c1-1','c1-2'],'res1')">Revisar mis respuestas</button>
+    <p class="resultado-chequeo" id="res1"></p>
+  </div>
+</div>
+
+<!-- 2: SECTOR CIRCULAR TEORÍA -->
+<div class="card" id="s2">
+  <h2>3️⃣ Sector circular</h2>
+  <div class="grid2">
+    <div>
+      <svg width="220" height="220" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="95" fill="none" stroke="#ddd" stroke-width="2"/>
+        <path d="M120,120 L120,25 A95,95 0 0,1 202,168 Z" fill="var(--morado3)" opacity="0.75" stroke="var(--morado1)" stroke-width="2"/>
+        <line x1="120" y1="120" x2="120" y2="25" stroke="var(--morado1)" stroke-width="3"/>
+        <line x1="120" y1="120" x2="202" y2="168" stroke="var(--morado1)" stroke-width="3"/>
+        <text x="128" y="70" font-size="13" font-weight="bold" fill="var(--morado1)">r</text>
+        <text x="165" y="105" font-size="13" font-weight="bold" fill="var(--rosa)">arco</text>
+        <text x="128" y="130" font-size="13" font-weight="bold">θ</text>
+      </svg>
+    </div>
+    <div class="basico">
+      <p>El <strong>sector circular</strong> es la parte del círculo que queda entre <strong>dos radios</strong> y el <strong>arco</strong>.</p>
+      <p>Se parece a una porción de pizza cortada desde el centro.</p>
+    </div>
+  </div>
+
+  <div class="recordatorio">Recuerda: π = 3.</div>
+  <table class="tabla-formulas">
+    <tr><th>Elemento</th><th>Fórmula</th></tr>
+    <tr><td>Perímetro del sector</td><td>P = arco + 2 × r</td></tr>
+    <tr><td>Área del sector</td><td>A = (π × r² × θ) ÷ 360</td></tr>
+  </table>
+  <p class="hint">El perímetro se mide en cm o m (una sola dimensión). El área se mide en cm² o m² (dos dimensiones). Son cosas distintas.</p>
+
+  <h3>Ejemplo paso a paso</h3>
+  <div class="ex-item">
+    <p class="pregunta">Sector con radio 6 cm y ángulo central 60°. Calcula el perímetro y el área.</p>
+    <button class="reveal-btn" onclick="toggleSol('sol1')">Ver los pasos</button>
+    <div class="solucion" id="sol1">
+      <p><strong>Paso 1: calcular el arco.</strong></p>
+      <ol>
+        <li>L = (60 ÷ 360) × 2 × 3 × 6</li>
+        <li>60 ÷ 360 = 0,1666... (usamos 1/6)</li>
+        <li>2 × 3 × 6 = 36</li>
+        <li>36 ÷ 6 = 6</li>
+        <li>Arco = <strong>6 cm</strong></li>
+      </ol>
+      <p><strong>Paso 2: calcular el perímetro.</strong></p>
+      <ol>
+        <li>P = arco + 2 × r = 6 + 2 × 6 = 6 + 12 = <strong>18 cm</strong></li>
+      </ol>
+      <p><strong>Paso 3: calcular el área.</strong></p>
+      <ol>
+        <li>A = (3 × 6² × 60) ÷ 360</li>
+        <li>6² = 36</li>
+        <li>3 × 36 × 60 = 6.480</li>
+        <li>6.480 ÷ 360 = <strong>18 cm²</strong></li>
+      </ol>
+      <p class="hint">El perímetro dio 18 cm y el área dio 18 cm². El número es el mismo, pero miden cosas diferentes: uno mide un borde (cm) y el otro mide una superficie (cm²).</p>
+    </div>
+  </div>
+
+  <h3>🧮 Calculadora de sector circular</h3>
+  <p class="hint">Escribe el radio y el ángulo, y la calculadora hace las operaciones por ti.</p>
+  <div class="calc-box">
+    <label>Radio (r) en cm:</label>
+    <input type="number" id="sec-r" placeholder="Ej: 6">
+    <label>Ángulo central (θ) en grados:</label>
+    <input type="number" id="sec-theta" placeholder="Ej: 60">
+    <button class="btn" onclick="calcularSector()">Calcular</button>
+    <div class="result-box" id="sec-resultado"></div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">1. Sector con radio 6 cm, ángulo 180° (semicírculo). ¿Cuál es el área?</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c2-1" value="0">18 cm²</label>
+        <label><input type="radio" name="c2-1" value="1">54 cm²</label>
+        <label><input type="radio" name="c2-1" value="2">108 cm²</label>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p class="q-title">2. Con los mismos datos (r=6, θ=180°), ¿cuál es el perímetro?</p>
+      <div class="opciones" data-correct="2">
+        <label><input type="radio" name="c2-2" value="0">18 cm</label>
+        <label><input type="radio" name="c2-2" value="1">12 cm</label>
+        <label><input type="radio" name="c2-2" value="2">30 cm</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c2-1','c2-2'],'res2')">Revisar mis respuestas</button>
+    <p class="resultado-chequeo" id="res2"></p>
+  </div>
+</div>
+
+<!-- 3: SECTOR EJERCICIOS -->
+<div class="card" id="s3">
+  <h2>4️⃣ Sector circular: más ejercicios</h2>
+  <div class="recordatorio">Recuerda: π = 3.</div>
+
+  <div class="ex-item">
+    <p class="pregunta">1. Radio 10 cm, ángulo 90°. Calcula el perímetro y el área.</p>
+    <button class="reveal-btn" onclick="toggleSol('e3-1')">Ver los pasos</button>
+    <div class="solucion" id="e3-1">
+      <ol>
+        <li>Arco = (90÷360) × 2 × 3 × 10 = 0,25 × 60 = 15 cm</li>
+        <li>Perímetro = 15 + 2×10 = 15 + 20 = <strong>35 cm</strong></li>
+        <li>Área = (3 × 10² × 90) ÷ 360 = (3×100×90)÷360 = 27.000÷360 = <strong>75 cm²</strong></li>
+      </ol>
+    </div>
+  </div>
+  <div class="ex-item">
+    <p class="pregunta">2. Radio 8 cm, ángulo 120°. Calcula el perímetro y el área.</p>
+    <button class="reveal-btn" onclick="toggleSol('e3-2')">Ver los pasos</button>
+    <div class="solucion" id="e3-2">
+      <ol>
+        <li>Arco = (120÷360) × 2 × 3 × 8 = 0,333... × 48 = 16 cm</li>
+        <li>Perímetro = 16 + 2×8 = 16 + 16 = <strong>32 cm</strong></li>
+        <li>Área = (3 × 8² × 120) ÷ 360 = (3×64×120)÷360 = 23.040÷360 = <strong>64 cm²</strong></li>
+      </ol>
+    </div>
+  </div>
+  <div class="ex-item">
+    <p class="pregunta">3. Un abanico tiene forma de sector circular. Su radio es 15 cm y su ángulo es 60°. Calcula el área y el perímetro.</p>
+    <button class="reveal-btn" onclick="toggleSol('e3-3')">Ver los pasos</button>
+    <div class="solucion" id="e3-3">
+      <ol>
+        <li>Arco = (60÷360) × 2 × 3 × 15 = 0,1666... × 90 = 15 cm</li>
+        <li>Perímetro = 15 + 2×15 = 15 + 30 = <strong>45 cm</strong></li>
+        <li>Área = (3 × 15² × 60) ÷ 360 = (3×225×60)÷360 = 40.500÷360 = <strong>112,5 cm²</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">Radio 12 cm, ángulo 270°. ¿Cuál es el área del sector?</p>
+      <div class="opciones" data-correct="2">
+        <label><input type="radio" name="c3-1" value="0">108 cm²</label>
+        <label><input type="radio" name="c3-1" value="1">216 cm²</label>
+        <label><input type="radio" name="c3-1" value="2">324 cm²</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c3-1'],'res3')">Revisar mi respuesta</button>
+    <p class="resultado-chequeo" id="res3"></p>
+  </div>
+</div>
+
+<!-- 4: SEGMENTO TEORÍA -->
+<div class="card" id="s4">
+  <h2>5️⃣ Segmento circular</h2>
+  <div class="grid2">
+    <div>
+      <svg width="220" height="220" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="95" fill="none" stroke="#ddd" stroke-width="2"/>
+        <path d="M120,120 L120,25 A95,95 0 0,1 202,168 Z" fill="none" stroke="var(--morado1)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <path d="M120,25 A95,95 0 0,1 202,168 Z" fill="var(--rosa)" opacity="0.55" stroke="var(--rosa)" stroke-width="2"/>
+        <line x1="120" y1="25" x2="202" y2="168" stroke="var(--azul)" stroke-width="3"/>
+        <text x="155" y="90" font-size="13" font-weight="bold" fill="var(--rosa)">arco</text>
+        <text x="150" y="130" font-size="13" font-weight="bold" fill="var(--azul)">cuerda</text>
+      </svg>
+    </div>
+    <div class="basico">
+      <p>Una <strong>cuerda</strong> es una línea recta que une dos puntos del borde del círculo.</p>
+      <p>El <strong>segmento circular</strong> es la parte del círculo que queda entre esa <strong>cuerda</strong> y el <strong>arco</strong>.</p>
+      <p>Es diferente del sector: el sector usa los dos radios como borde, el segmento usa la cuerda como borde.</p>
+    </div>
+  </div>
+
+  <div class="recordatorio">Recuerda: π = 3.</div>
+  <table class="tabla-formulas">
+    <tr><th>Elemento</th><th>Fórmula</th></tr>
+    <tr><td>Cuerda (c)</td><td>c = 2 × r × sen(θ ÷ 2)</td></tr>
+    <tr><td>Perímetro del segmento</td><td>P = arco + cuerda</td></tr>
+    <tr><td>Área del segmento</td><td>A = área del sector − área del triángulo</td></tr>
+  </table>
+
+  <p>Para calcular la cuerda necesitamos el valor de "sen" (seno) de un ángulo. Usaremos siempre esta tabla:</p>
+  <table class="tabla-seno">
+    <tr><th>Ángulo</th><th>30°</th><th>45°</th><th>60°</th><th>90°</th><th>120°</th><th>150°</th><th>180°</th></tr>
+    <tr><th>sen</th><td>0,5</td><td>0,71</td><td>0,87</td><td>1</td><td>0,87</td><td>0,5</td><td>0</td></tr>
+  </table>
+
+  <h3>Ejemplo paso a paso</h3>
+  <div class="ex-item">
+    <p class="pregunta">Segmento con radio 6 cm y ángulo central 90°. Calcula el perímetro y el área.</p>
+    <button class="reveal-btn" onclick="toggleSol('sol2')">Ver los pasos</button>
+    <div class="solucion" id="sol2">
+      <p><strong>Paso 1: calcular el arco.</strong></p>
+      <ol>
+        <li>Arco = (90÷360) × 2 × 3 × 6 = 0,25 × 36 = <strong>9 cm</strong></li>
+      </ol>
+      <p><strong>Paso 2: calcular la cuerda.</strong></p>
+      <ol>
+        <li>Cuerda = 2 × r × sen(θ÷2) = 2 × 6 × sen(45°)</li>
+        <li>En la tabla, sen(45°) = 0,71</li>
+        <li>Cuerda = 12 × 0,71 = <strong>8,52 cm</strong></li>
+      </ol>
+      <p><strong>Paso 3: calcular el perímetro.</strong></p>
+      <ol>
+        <li>Perímetro = arco + cuerda = 9 + 8,52 = <strong>17,52 cm</strong></li>
+      </ol>
+      <p><strong>Paso 4: calcular el área del sector.</strong></p>
+      <ol>
+        <li>Área sector = (3 × 6² × 90) ÷ 360 = (3×36×90)÷360 = 9.720÷360 = 27 cm²</li>
+      </ol>
+      <p><strong>Paso 5: calcular el área del triángulo.</strong></p>
+      <ol>
+        <li>Área triángulo = 0,5 × r² × sen(θ) = 0,5 × 36 × sen(90°)</li>
+        <li>En la tabla, sen(90°) = 1</li>
+        <li>Área triángulo = 0,5 × 36 × 1 = 18 cm²</li>
+      </ol>
+      <p><strong>Paso 6: calcular el área del segmento.</strong></p>
+      <ol>
+        <li>Área segmento = área sector − área triángulo = 27 − 18 = <strong>9 cm²</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="basico">
+    <p><strong>Caso especial:</strong> cuando el ángulo central es 180°, la cuerda pasa por el centro. En ese caso, la cuerda es igual al diámetro, y el segmento es exactamente la mitad del círculo (un semicírculo).</p>
+  </div>
+
+  <h3>🧮 Calculadora de segmento circular</h3>
+  <div class="calc-box">
+    <label>Radio (r) en cm:</label>
+    <input type="number" id="seg-r" placeholder="Ej: 6">
+    <label>Ángulo central (θ) en grados:</label>
+    <input type="number" id="seg-theta" placeholder="Ej: 90">
+    <button class="btn" onclick="calcularSegmento()">Calcular</button>
+    <div class="result-box" id="seg-resultado"></div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">1. Radio 4 cm, ángulo 60°. ¿Cuánto mide la cuerda? (sen 30°=0,5)</p>
+      <div class="opciones" data-correct="0">
+        <label><input type="radio" name="c4-1" value="0">4 cm</label>
+        <label><input type="radio" name="c4-1" value="1">8 cm</label>
+        <label><input type="radio" name="c4-1" value="2">2 cm</label>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p class="q-title">2. ¿Qué se resta al área del sector para obtener el área del segmento?</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c4-2" value="0">El área del círculo completo</label>
+        <label><input type="radio" name="c4-2" value="1">El área del triángulo</label>
+        <label><input type="radio" name="c4-2" value="2">La longitud del arco</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c4-1','c4-2'],'res4')">Revisar mis respuestas</button>
+    <p class="resultado-chequeo" id="res4"></p>
+  </div>
+</div>
+
+<!-- 5: SEGMENTO EJERCICIOS -->
+<div class="card" id="s5">
+  <h2>6️⃣ Segmento circular: más ejercicios</h2>
+  <div class="recordatorio">Recuerda: π = 3. Usa la tabla de senos de la sección anterior.</div>
+
+  <div class="ex-item">
+    <p class="pregunta">1. Radio 10 cm, ángulo 60°. Calcula el perímetro y el área.</p>
+    <button class="reveal-btn" onclick="toggleSol('e5-1')">Ver los pasos</button>
+    <div class="solucion" id="e5-1">
+      <ol>
+        <li>Arco = (60÷360)×2×3×10 = 0,1666×60 = 10 cm</li>
+        <li>Cuerda = 2×10×sen(30°) = 20×0,5 = 10 cm</li>
+        <li>Perímetro = 10 + 10 = <strong>20 cm</strong></li>
+        <li>Área sector = (3×10²×60)÷360 = 18.000÷360 = 50 cm²</li>
+        <li>Área triángulo = 0,5×100×sen(60°) = 50×0,87 = 43,5 cm²</li>
+        <li>Área segmento = 50 − 43,5 = <strong>6,5 cm²</strong></li>
+      </ol>
+    </div>
+  </div>
+  <div class="ex-item">
+    <p class="pregunta">2. Una banca de plaza tiene forma de segmento circular. Radio 5 m, ángulo 120°. ¿Cuánto mide su perímetro?</p>
+    <button class="reveal-btn" onclick="toggleSol('e5-2')">Ver los pasos</button>
+    <div class="solucion" id="e5-2">
+      <ol>
+        <li>Arco = (120÷360)×2×3×5 = 0,333×30 = 10 m</li>
+        <li>Cuerda = 2×5×sen(60°) = 10×0,87 = 8,7 m</li>
+        <li>Perímetro = 10 + 8,7 = <strong>18,7 m</strong></li>
+      </ol>
+    </div>
+  </div>
+  <div class="ex-item">
+    <p class="pregunta">3. Un jardín tiene forma de segmento circular. Radio 12 m, ángulo 90°. ¿Cuánta área tiene para plantar?</p>
+    <button class="reveal-btn" onclick="toggleSol('e5-3')">Ver los pasos</button>
+    <div class="solucion" id="e5-3">
+      <ol>
+        <li>Área sector = (3×12²×90)÷360 = 38.880÷360 = 108 m²</li>
+        <li>Área triángulo = 0,5×144×sen(90°) = 72×1 = 72 m²</li>
+        <li>Área segmento = 108 − 72 = <strong>36 m²</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">Radio 5 cm, ángulo 180°. ¿Cuánto mide la cuerda? (sen 90°=1)</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c5-1" value="0">5 cm</label>
+        <label><input type="radio" name="c5-1" value="1">10 cm</label>
+        <label><input type="radio" name="c5-1" value="2">7,5 cm</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c5-1'],'res5')">Revisar mi respuesta</button>
+    <p class="resultado-chequeo" id="res5"></p>
+  </div>
+</div>
+
+<!-- 6: PROBLEMAS CONTEXTUALIZADOS CÍRCULO -->
+<div class="card" id="s6">
+  <h2>7️⃣ Problemas de la vida real (sector y segmento)</h2>
+  <div class="recordatorio">Recuerda: π = 3.</div>
+
+  <div class="ex-item">
+    <p class="pregunta">1. Un parque tiene forma de segmento circular. Radio 9 m, ángulo 120°. La cuerda mide 16 m. La altura del triángulo (desde el centro hasta la cuerda) es 4,5 m. ¿Cuántos m² tiene el parque?</p>
+    <p class="hint">Aquí ya tienes la base y la altura del triángulo. Fórmula del triángulo: (base × altura) ÷ 2.</p>
+    <button class="reveal-btn" onclick="toggleSol('e6-1')">Ver los pasos</button>
+    <div class="solucion" id="e6-1">
+      <ol>
+        <li>Área sector = (3×9²×120)÷360 = 29.160÷360 = 81 m²</li>
+        <li>Área triángulo = (16×4,5)÷2 = 72÷2 = 36 m²</li>
+        <li>Área parque = 81 − 36 = <strong>45 m²</strong></li>
+      </ol>
+    </div>
+  </div>
+  <div class="ex-item">
+    <p class="pregunta">2. Una marquesina tiene forma de sector circular. Radio 6 m, ángulo 270°. ¿Cuántos m² cubre?</p>
+    <button class="reveal-btn" onclick="toggleSol('e6-2')">Ver los pasos</button>
+    <div class="solucion" id="e6-2">
+      <ol><li>Área = (3×6²×270)÷360 = 29.160÷360 = <strong>81 m²</strong></li></ol>
+    </div>
+  </div>
+  <div class="ex-item">
+    <p class="pregunta">3. Un estanque tiene forma de segmento circular. Radio 6 m, ángulo 120°. ¿Cuánto mide su borde recto (la cuerda)?</p>
+    <button class="reveal-btn" onclick="toggleSol('e6-3')">Ver los pasos</button>
+    <div class="solucion" id="e6-3">
+      <ol><li>Cuerda = 2×6×sen(60°) = 12×0,87 = <strong>10,44 m</strong></li></ol>
+    </div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">Una porción de pizza tiene radio 20 cm y ángulo 45°. ¿Cuál es su perímetro?</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c6-1" value="0">15 cm</label>
+        <label><input type="radio" name="c6-1" value="1">55 cm</label>
+        <label><input type="radio" name="c6-1" value="2">60 cm</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c6-1'],'res6')">Revisar mi respuesta</button>
+    <p class="resultado-chequeo" id="res6"></p>
+  </div>
+</div>
+
+<!-- 7: CILINDRO ELEMENTOS -->
+<div class="card" id="s7">
+  <h2>8️⃣ Ahora un cuerpo 3D: el cilindro</h2>
+  <div class="basico">
+    <p>Un <strong>cilindro</strong> es un cuerpo con estas partes:</p>
+    <ul class="repaso">
+      <li><strong>Dos bases circulares:</strong> son dos círculos iguales, uno arriba y uno abajo.</li>
+      <li><strong>Una superficie lateral curva:</strong> es la parte redonda que une las dos bases.</li>
+    </ul>
+    <p>Un tarro de conserva y un vaso cilíndrico son ejemplos de cilindro.</p>
+    <p>Sus medidas son:</p>
+    <ul class="repaso">
+      <li><strong>Radio (r):</strong> el radio de cada base circular.</li>
+      <li><strong>Altura (h):</strong> la distancia entre las dos bases.</li>
+    </ul>
+  </div>
+  <svg width="200" height="220" viewBox="0 0 200 220">
+    <ellipse cx="100" cy="40" rx="70" ry="20" fill="#e0d4f5" stroke="var(--morado1)" stroke-width="2"/>
+    <line x1="30" y1="40" x2="30" y2="180" stroke="var(--morado1)" stroke-width="2"/>
+    <line x1="170" y1="40" x2="170" y2="180" stroke="var(--morado1)" stroke-width="2"/>
+    <path d="M30,180 A70,20 0 0,0 170,180" fill="#f4e9ff" stroke="var(--morado1)" stroke-width="2"/>
+    <line x1="100" y1="40" x2="100" y2="180" stroke="var(--rosa)" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="108" y="115" fill="var(--rosa)" font-weight="bold" font-size="13">h</text>
+    <line x1="100" y1="40" x2="170" y2="40" stroke="var(--azul)" stroke-width="2"/>
+    <text x="125" y="35" fill="var(--azul)" font-weight="bold" font-size="13">r</text>
+  </svg>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">1. Las dos bases de un cilindro son:</p>
+      <div class="opciones" data-correct="0">
+        <label><input type="radio" name="c7-1" value="0">Círculos iguales, uno arriba y uno abajo</label>
+        <label><input type="radio" name="c7-1" value="1">Triángulos</label>
+        <label><input type="radio" name="c7-1" value="2">Un solo punto</label>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p class="q-title">2. La altura (h) de un cilindro es:</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c7-2" value="0">El radio de la base</label>
+        <label><input type="radio" name="c7-2" value="1">La distancia entre las dos bases</label>
+        <label><input type="radio" name="c7-2" value="2">El perímetro de la base</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c7-1','c7-2'],'res7')">Revisar mis respuestas</button>
+    <p class="resultado-chequeo" id="res7"></p>
+  </div>
+</div>
+
+<!-- 8: CILINDRO ÁREA Y VOLUMEN -->
+<div class="card" id="s8">
+  <h2>9️⃣ Cilindro: volumen y superficie</h2>
+  <div class="recordatorio">Recuerda: π = 3.</div>
+  <table class="tabla-formulas">
+    <tr><th>Elemento</th><th>Fórmula</th></tr>
+    <tr><td>Volumen</td><td>V = π × r² × h</td></tr>
+    <tr><td>Superficie total</td><td>S = 2 × π × r × (r + h)</td></tr>
+  </table>
+
+  <h3>Ejemplo paso a paso</h3>
+  <div class="ex-item">
+    <p class="pregunta">Cilindro con radio 3 cm y altura 5 cm. Calcula el volumen y la superficie total.</p>
+    <button class="reveal-btn" onclick="toggleSol('sol-cil')">Ver los pasos</button>
+    <div class="solucion" id="sol-cil">
+      <p><strong>Volumen:</strong></p>
+      <ol>
+        <li>V = π × r² × h = 3 × 3² × 5</li>
+        <li>3² = 9</li>
+        <li>3 × 9 × 5 = <strong>135 cm³</strong></li>
+      </ol>
+      <p><strong>Superficie total:</strong></p>
+      <ol>
+        <li>S = 2 × π × r × (r+h) = 2 × 3 × 3 × (3+5)</li>
+        <li>3+5 = 8</li>
+        <li>2 × 3 × 3 × 8 = <strong>144 cm²</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>Otro ejemplo</h3>
+  <div class="ex-item">
+    <p class="pregunta">Cilindro con radio 5 cm y altura 10 cm. Calcula el volumen y la superficie total.</p>
+    <button class="reveal-btn" onclick="toggleSol('sol-cil2')">Ver los pasos</button>
+    <div class="solucion" id="sol-cil2">
+      <ol>
+        <li>Volumen = 3 × 5² × 10 = 3×25×10 = <strong>750 cm³</strong></li>
+        <li>Superficie = 2 × 3 × 5 × (5+10) = 30×15 = <strong>450 cm²</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>🧮 Calculadora de cilindro</h3>
+  <div class="calc-box">
+    <label>Radio (r) en cm:</label>
+    <input type="number" id="cil-r" placeholder="Ej: 5">
+    <label>Altura (h) en cm:</label>
+    <input type="number" id="cil-h" placeholder="Ej: 10">
+    <button class="btn" onclick="calcularCilindro()">Calcular</button>
+    <div class="result-box" id="cil-resultado"></div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">1. Cilindro con radio 2 cm y altura 5 cm. ¿Cuál es su volumen?</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c8-1" value="0">30 cm³</label>
+        <label><input type="radio" name="c8-1" value="1">60 cm³</label>
+        <label><input type="radio" name="c8-1" value="2">120 cm³</label>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p class="q-title">2. ¿Qué fórmula corresponde a la superficie total del cilindro?</p>
+      <div class="opciones" data-correct="2">
+        <label><input type="radio" name="c8-2" value="0">π × r² × h</label>
+        <label><input type="radio" name="c8-2" value="1">π × r × (r+g)</label>
+        <label><input type="radio" name="c8-2" value="2">2 × π × r × (r+h)</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c8-1','c8-2'],'res8')">Revisar mis respuestas</button>
+    <p class="resultado-chequeo" id="res8"></p>
+  </div>
+</div>
+
+<!-- 9: CONO ELEMENTOS -->
+<div class="card" id="s9">
+  <h2>🔟 Ahora el cono</h2>
+  <div class="basico">
+    <p>Un <strong>cono</strong> tiene estas partes:</p>
+    <ul class="repaso">
+      <li><strong>Una base circular:</strong> un solo círculo, abajo.</li>
+      <li><strong>Una superficie curva:</strong> se va cerrando hasta terminar en un punto.</li>
+      <li><strong>Vértice:</strong> el punto donde termina la superficie curva, arriba.</li>
+    </ul>
+    <p>Un cucurucho de helado es un ejemplo de cono.</p>
+    <p>Sus medidas son:</p>
+    <ul class="repaso">
+      <li><strong>Radio (r):</strong> el radio de la base circular.</li>
+      <li><strong>Altura (h):</strong> distancia entre el vértice y el centro de la base, en línea recta vertical.</li>
+      <li><strong>Generatriz (g):</strong> distancia entre el vértice y un punto del borde de la base, en línea inclinada.</li>
+    </ul>
+  </div>
+  <div class="formula-box">Relación entre r, h y g: g² = r² + h²</div>
+
+  <svg width="200" height="220" viewBox="0 0 200 220">
+    <ellipse cx="100" cy="180" rx="70" ry="20" fill="#f4e9ff" stroke="var(--morado1)" stroke-width="2"/>
+    <line x1="30" y1="180" x2="100" y2="30" stroke="var(--morado1)" stroke-width="2"/>
+    <line x1="170" y1="180" x2="100" y2="30" stroke="var(--morado1)" stroke-width="2"/>
+    <line x1="100" y1="180" x2="100" y2="30" stroke="var(--rosa)" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="108" y="110" fill="var(--rosa)" font-weight="bold" font-size="13">h</text>
+    <line x1="100" y1="180" x2="170" y2="180" stroke="var(--azul)" stroke-width="2"/>
+    <text x="125" y="175" fill="var(--azul)" font-weight="bold" font-size="13">r</text>
+    <text x="140" y="100" fill="var(--verde)" font-weight="bold" font-size="13">g</text>
+  </svg>
+
+  <h3>Ejemplo paso a paso</h3>
+  <div class="ex-item">
+    <p class="pregunta">Un cono tiene radio 3 cm y altura 4 cm. ¿Cuánto mide la generatriz g?</p>
+    <button class="reveal-btn" onclick="toggleSol('sol-gen')">Ver los pasos</button>
+    <div class="solucion" id="sol-gen">
+      <ol>
+        <li>g² = r² + h² = 3² + 4² = 9 + 16 = 25</li>
+        <li>g = raíz cuadrada de 25</li>
+        <li>Respuesta: <strong>g = 5 cm</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">1. El vértice del cono es:</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c9-1" value="0">El centro de la base</label>
+        <label><input type="radio" name="c9-1" value="1">El punto donde termina la superficie curva</label>
+        <label><input type="radio" name="c9-1" value="2">Un punto del borde de la base</label>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p class="q-title">2. Si r=6 y h=8, ¿cuánto mide g? (g²=r²+h²)</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c9-2" value="0">14</label>
+        <label><input type="radio" name="c9-2" value="1">10</label>
+        <label><input type="radio" name="c9-2" value="2">48</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c9-1','c9-2'],'res9')">Revisar mis respuestas</button>
+    <p class="resultado-chequeo" id="res9"></p>
+  </div>
+</div>
+
+<!-- 10: CONO ÁREA Y VOLUMEN -->
+<div class="card" id="s10">
+  <h2>1️⃣1️⃣ Cono: volumen y superficie</h2>
+  <div class="recordatorio">Recuerda: π = 3.</div>
+  <table class="tabla-formulas">
+    <tr><th>Elemento</th><th>Fórmula</th></tr>
+    <tr><td>Volumen</td><td>V = (π × r² × h) ÷ 3</td></tr>
+    <tr><td>Superficie total</td><td>S = π × r × (r + g)</td></tr>
+  </table>
+  <p class="hint">El volumen del cono es siempre 1/3 del volumen de un cilindro con la misma base y la misma altura.</p>
+
+  <h3>Ejemplo paso a paso</h3>
+  <div class="ex-item">
+    <p class="pregunta">Cono con radio 3 cm y altura 4 cm (entonces g=5 cm, calculado antes). Calcula el volumen y la superficie total.</p>
+    <button class="reveal-btn" onclick="toggleSol('sol-cono')">Ver los pasos</button>
+    <div class="solucion" id="sol-cono">
+      <p><strong>Volumen:</strong></p>
+      <ol>
+        <li>V = (π × r² × h) ÷ 3 = (3 × 3² × 4) ÷ 3</li>
+        <li>3² = 9</li>
+        <li>3 × 9 × 4 = 108</li>
+        <li>108 ÷ 3 = <strong>36 cm³</strong></li>
+      </ol>
+      <p><strong>Superficie total:</strong></p>
+      <ol>
+        <li>S = π × r × (r+g) = 3 × 3 × (3+5)</li>
+        <li>3+5 = 8</li>
+        <li>3 × 3 × 8 = <strong>72 cm²</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>Otro ejemplo</h3>
+  <div class="ex-item">
+    <p class="pregunta">Cono con radio 5 cm y altura 12 cm (entonces g=13 cm). Calcula el volumen y la superficie total.</p>
+    <button class="reveal-btn" onclick="toggleSol('sol-cono2')">Ver los pasos</button>
+    <div class="solucion" id="sol-cono2">
+      <ol>
+        <li>Volumen = (3×5²×12)÷3 = (3×25×12)÷3 = 900÷3 = <strong>300 cm³</strong></li>
+        <li>Superficie = 3×5×(5+13) = 15×18 = <strong>270 cm²</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>🧮 Calculadora de cono</h3>
+  <div class="calc-box">
+    <label>Radio (r) en cm:</label>
+    <input type="number" id="con-r" placeholder="Ej: 3">
+    <label>Altura (h) en cm:</label>
+    <input type="number" id="con-h" placeholder="Ej: 4">
+    <button class="btn" onclick="calcularCono()">Calcular</button>
+    <div class="result-box" id="con-resultado"></div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">1. Cono con radio 6 cm y altura 4 cm. ¿Cuál es su volumen?</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c10-1" value="0">72 cm³</label>
+        <label><input type="radio" name="c10-1" value="1">144 cm³</label>
+        <label><input type="radio" name="c10-1" value="2">432 cm³</label>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p class="q-title">2. El volumen del cono, comparado con un cilindro de igual base y altura, es:</p>
+      <div class="opciones" data-correct="0">
+        <label><input type="radio" name="c10-2" value="0">Un tercio (1/3) del cilindro</label>
+        <label><input type="radio" name="c10-2" value="1">El doble del cilindro</label>
+        <label><input type="radio" name="c10-2" value="2">Igual al cilindro</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c10-1','c10-2'],'res10')">Revisar mis respuestas</button>
+    <p class="resultado-chequeo" id="res10"></p>
+  </div>
+</div>
+
+<!-- 11: PROBLEMAS CONO-CILINDRO -->
+<div class="card" id="s11">
+  <h2>1️⃣2️⃣ Problemas de la vida real (cono y cilindro)</h2>
+  <div class="recordatorio">Recuerda: π = 3.</div>
+
+  <div class="ex-item">
+    <p class="pregunta">1. Un embudo cónico tiene radio 4 cm y altura 9 cm. ¿Qué volumen de líquido puede contener?</p>
+    <button class="reveal-btn" onclick="toggleSol('e11-1')">Ver los pasos</button>
+    <div class="solucion" id="e11-1">
+      <ol><li>Volumen = (3×4²×9)÷3 = (3×16×9)÷3 = 432÷3 = <strong>144 cm³</strong></li></ol>
+    </div>
+  </div>
+  <div class="ex-item">
+    <p class="pregunta">2. Un tarro cilíndrico tiene radio 5 cm y altura 12 cm. ¿Cuánta lata se necesita para fabricarlo (superficie total)?</p>
+    <button class="reveal-btn" onclick="toggleSol('e11-2')">Ver los pasos</button>
+    <div class="solucion" id="e11-2">
+      <ol><li>Superficie = 2×3×5×(5+12) = 30×17 = <strong>510 cm²</strong></li></ol>
+    </div>
+  </div>
+  <div class="ex-item">
+    <p class="pregunta">3. Un cilindro tiene radio 3 cm y altura 8 cm. Un cono con el mismo radio y la misma altura, ¿qué volumen tiene?</p>
+    <button class="reveal-btn" onclick="toggleSol('e11-3')">Ver los pasos</button>
+    <div class="solucion" id="e11-3">
+      <ol>
+        <li>Volumen del cilindro = 3×3²×8 = 3×9×8 = 216 cm³</li>
+        <li>El cono siempre mide 1/3 del cilindro: 216÷3 = <strong>72 cm³</strong></li>
+      </ol>
+    </div>
+  </div>
+  <div class="ex-item">
+    <p class="pregunta">4. Un cucurucho de helado tiene radio 3 cm y altura 9 cm. ¿Cuánto helado le cabe (volumen)?</p>
+    <button class="reveal-btn" onclick="toggleSol('e11-4')">Ver los pasos</button>
+    <div class="solucion" id="e11-4">
+      <ol><li>Volumen = (3×3²×9)÷3 = (3×9×9)÷3 = 243÷3 = <strong>81 cm³</strong></li></ol>
+    </div>
+  </div>
+
+  <div class="chequeo-box">
+    <h4>✅ Practica un poco</h4>
+    <div class="quiz-q">
+      <p class="q-title">Un vaso cilíndrico tiene radio 4 cm y altura 10 cm. ¿Cuánta agua le cabe (volumen)?</p>
+      <div class="opciones" data-correct="1">
+        <label><input type="radio" name="c11-1" value="0">240 cm³</label>
+        <label><input type="radio" name="c11-1" value="1">480 cm³</label>
+        <label><input type="radio" name="c11-1" value="2">360 cm³</label>
+      </div>
+    </div>
+    <button class="btn" onclick="revisarGrupo(['c11-1'],'res11')">Revisar mi respuesta</button>
+    <p class="resultado-chequeo" id="res11"></p>
+  </div>
+</div>
+
+<!-- 12: SÍNTESIS GENERAL -->
+<div class="card" id="s12">
+  <h2>1️⃣3️⃣ Resumen de todas las fórmulas</h2>
+  <div class="recordatorio">Recuerda: π = 3 en todas las fórmulas.</div>
+  <div class="grid2">
+    <div class="formula-box">
+      <strong>SECTOR CIRCULAR</strong><br>Perímetro = arco + 2×r<br>Área = (π×r²×θ)÷360
+    </div>
+    <div class="formula-box">
+      <strong>SEGMENTO CIRCULAR</strong><br>Perímetro = arco + cuerda<br>Área = área sector − área triángulo
+    </div>
+    <div class="formula-box">
+      <strong>CILINDRO</strong><br>Volumen = π×r²×h<br>Superficie = 2×π×r×(r+h)
+    </div>
+    <div class="formula-box">
+      <strong>CONO</strong><br>Volumen = (π×r²×h)÷3<br>Superficie = π×r×(r+g), con g²=r²+h²
+    </div>
+  </div>
+  <p style="margin-top:16px;">Cuando estés listo, avanza al <strong>test final de 10 preguntas</strong>. Mezcla los dos temas.</p>
+</div>
+
+<!-- 13: TEST FINAL -->
+<div class="card" id="s13">
+  <h2>1️⃣4️⃣ Test Final — 10 preguntas</h2>
+  <p>5 preguntas son de sector y segmento circular. 5 preguntas son de cono y cilindro. Marca una alternativa por pregunta. Recuerda: π = 3.</p>
+  <div class="progressbar"><div class="progressbar-fill" id="testProgress"></div></div>
+
+  <div class="quiz-q">
+    <p class="q-title">1. La fórmula del área de un sector circular es:</p>
+    <div class="opciones" data-correct="1">
+      <label><input type="radio" name="t1" value="0">A = π×r²</label>
+      <label><input type="radio" name="t1" value="1">A = (π×r²×θ)÷360</label>
+      <label><input type="radio" name="t1" value="2">A = 2×π×r</label>
+    </div>
+  </div>
+  <div class="quiz-q">
+    <p class="q-title">2. ¿Qué distingue al segmento circular del sector circular?</p>
+    <div class="opciones" data-correct="0">
+      <label><input type="radio" name="t2" value="0">El segmento usa una cuerda como borde, no dos radios</label>
+      <label><input type="radio" name="t2" value="1">El segmento no tiene arco</label>
+      <label><input type="radio" name="t2" value="2">El segmento no tiene ángulo central</label>
+    </div>
+  </div>
+  <div class="quiz-q">
+    <p class="q-title">3. Radio 4 cm, ángulo 90°. ¿Cuánto mide el arco?</p>
+    <div class="opciones" data-correct="1">
+      <label><input type="radio" name="t3" value="0">3 cm</label>
+      <label><input type="radio" name="t3" value="1">6 cm</label>
+      <label><input type="radio" name="t3" value="2">12 cm</label>
+    </div>
+  </div>
+  <div class="quiz-q">
+    <p class="q-title">4. ¿Cuál es la fórmula de la cuerda de un segmento circular?</p>
+    <div class="opciones" data-correct="1">
+      <label><input type="radio" name="t4" value="0">c = r × θ</label>
+      <label><input type="radio" name="t4" value="1">c = 2 × r × sen(θ÷2)</label>
+      <label><input type="radio" name="t4" value="2">c = π × r²</label>
+    </div>
+  </div>
+  <div class="quiz-q">
+    <p class="q-title">5. Un semicírculo corresponde a un sector circular de:</p>
+    <div class="opciones" data-correct="2">
+      <label><input type="radio" name="t5" value="0">90°</label>
+      <label><input type="radio" name="t5" value="1">270°</label>
+      <label><input type="radio" name="t5" value="2">180°</label>
+    </div>
+  </div>
+  <div class="quiz-q">
+    <p class="q-title">6. La fórmula del volumen del cilindro es:</p>
+    <div class="opciones" data-correct="0">
+      <label><input type="radio" name="t6" value="0">V = π × r² × h</label>
+      <label><input type="radio" name="t6" value="1">V = (π × r² × h) ÷ 3</label>
+      <label><input type="radio" name="t6" value="2">V = 2 × π × r × h</label>
+    </div>
+  </div>
+  <div class="quiz-q">
+    <p class="q-title">7. El volumen de un cono, comparado con un cilindro de igual base y altura, es:</p>
+    <div class="opciones" data-correct="1">
+      <label><input type="radio" name="t7" value="0">El doble</label>
+      <label><input type="radio" name="t7" value="1">Un tercio (1/3)</label>
+      <label><input type="radio" name="t7" value="2">Igual</label>
+    </div>
+  </div>
+  <div class="quiz-q">
+    <p class="q-title">8. En un cono, ¿cómo se relacionan el radio, la altura y la generatriz?</p>
+    <div class="opciones" data-correct="2">
+      <label><input type="radio" name="t8" value="0">g = r + h</label>
+      <label><input type="radio" name="t8" value="1">g = r × h</label>
+      <label><input type="radio" name="t8" value="2">g² = r² + h²</label>
+    </div>
+  </div>
+  <div class="quiz-q">
+    <p class="q-title">9. Cilindro con radio 5 cm y altura 10 cm. ¿Cuál es su volumen?</p>
+    <div class="opciones" data-correct="1">
+      <label><input type="radio" name="t9" value="0">150 cm³</label>
+      <label><input type="radio" name="t9" value="1">750 cm³</label>
+      <label><input type="radio" name="t9" value="2">450 cm³</label>
+    </div>
+  </div>
+  <div class="quiz-q">
+    <p class="q-title">10. Cono con radio 3 cm y altura 4 cm (g=5 cm). ¿Cuál es su superficie total?</p>
+    <div class="opciones" data-correct="0">
+      <label><input type="radio" name="t10" value="0">72 cm²</label>
+      <label><input type="radio" name="t10" value="1">36 cm²</label>
+      <label><input type="radio" name="t10" value="2">108 cm²</label>
+    </div>
+  </div>
+
+  <button class="btn" onclick="corregirTest()">Corregir test</button>
+
+  <div id="testResultado">
+    <p>Puntaje: <span id="puntajeTexto"></span></p>
+    <div class="nota-grande" id="notaGrande"></div>
+    <p id="mensajeFinal"></p>
+  </div>
+</div>
+
+<div class="nav-buttons">
+  <button class="prevnext" id="btnPrev" onclick="cambiarSeccion(-1)">⬅ Anterior</button>
+  <button class="prevnext" id="btnNext" onclick="cambiarSeccion(1)">Siguiente ➡</button>
+</div>
+
+</div>
+
+<script>
+const secciones = ["s0","s1","s2","s3","s4","s5","s6","s7","s8","s9","s10","s11","s12","s13"];
+const nombres = ["Círculo básico","Ángulo y arco","Sector: teoría","Sector: ejercicios","Segmento: teoría","Segmento: ejercicios","Problemas círculo","Cilindro: elementos","Cilindro: volumen","Cono: elementos","Cono: volumen","Problemas cono-cil.","Resumen","Test final"];
+let actual = 0;
+
+function construirNav(){
+  const nav = document.getElementById('navbar');
+  secciones.forEach((s,i)=>{
+    const b = document.createElement('button');
+    b.className = 'navbtn' + (i===0 ? ' active' : '');
+    b.textContent = (i+1) + ". " + nombres[i];
+    b.onclick = ()=> irASeccion(i);
+    b.id = 'nav-'+i;
+    nav.appendChild(b);
+  });
+}
+function irASeccion(i){
+  document.getElementById(secciones[actual]).classList.remove('show');
+  document.getElementById('nav-'+actual).classList.remove('active');
+  actual = i;
+  document.getElementById(secciones[actual]).classList.add('show');
+  document.getElementById('nav-'+actual).classList.add('active');
+  document.getElementById('btnPrev').disabled = (actual===0);
+  document.getElementById('btnNext').disabled = (actual===secciones.length-1);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function cambiarSeccion(delta){
+  const nuevo = actual + delta;
+  if(nuevo>=0 && nuevo<secciones.length) irASeccion(nuevo);
+}
+construirNav();
+irASeccion(0);
+
+function beep(correcto){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = correcto ? 880 : 220;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
+    osc.start(); osc.stop(ctx.currentTime+0.3);
+  }catch(e){}
+}
+
+let segundosRestantes = 120*60;
+const timerEl = document.getElementById('timer');
+function actualizarTimer(){
+  const m = Math.floor(segundosRestantes/60);
+  const s = segundosRestantes%60;
+  timerEl.textContent = String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
+  if(segundosRestantes<=300) timerEl.classList.add('warn');
+  if(segundosRestantes>0) segundosRestantes--;
+  else clearInterval(timerInterval);
+}
+actualizarTimer();
+const timerInterval = setInterval(actualizarTimer, 1000);
+
+function toggleSol(id){ document.getElementById(id).classList.toggle('show'); }
+
+function revisarGrupo(gruposNombres, resultadoId){
+  let correctas = 0;
+  gruposNombres.forEach(g=>{
+    const opciones = document.querySelectorAll(`input[name="${g}"]`);
+    const contenedor = opciones[0].closest('.opciones');
+    const correctIndex = contenedor.dataset.correct;
+    let elegido = null;
+    opciones.forEach(o=>{ if(o.checked) elegido = o.value; });
+    contenedor.querySelectorAll('label').forEach((label,idx)=>{
+      label.classList.remove('correcta','incorrecta');
+      if(String(idx)===correctIndex) label.classList.add('correcta');
+      else if(elegido===String(idx)) label.classList.add('incorrecta');
+    });
+    if(elegido===correctIndex) correctas++;
+  });
+  const total = gruposNombres.length;
+  beep(correctas===total);
+  document.getElementById(resultadoId).textContent =
+    `Respuestas correctas: ${correctas} de ${total}. ` + (correctas===total ? "Todas correctas." : "Revisa las respuestas marcadas en rojo.");
+}
+
+function calcularSector(){
+  const r = parseFloat(document.getElementById('sec-r').value);
+  const theta = parseFloat(document.getElementById('sec-theta').value);
+  const box = document.getElementById('sec-resultado');
+  if(isNaN(r) || isNaN(theta) || r<=0 || theta<=0 || theta>360){
+    box.style.display='block'; box.style.borderColor='var(--rojo)'; box.style.background='#fde8e8';
+    box.innerHTML = "Escribe un radio y un ángulo válidos (entre 0° y 360°)."; return;
+  }
+  const arco = 3*r*theta/180;
+  const perimetro = arco + 2*r;
+  const area = 3*r*r*theta/360;
+  box.style.display='block'; box.style.borderColor='var(--verde)'; box.style.background='#eafaf1';
+  box.innerHTML = `Arco = <strong>${arco.toFixed(2)} cm</strong><br>Perímetro = <strong>${perimetro.toFixed(2)} cm</strong><br>Área = <strong>${area.toFixed(2)} cm²</strong>`;
+  beep(true);
+}
+
+function calcularSegmento(){
+  const r = parseFloat(document.getElementById('seg-r').value);
+  const theta = parseFloat(document.getElementById('seg-theta').value);
+  const box = document.getElementById('seg-resultado');
+  if(isNaN(r) || isNaN(theta) || r<=0 || theta<=0 || theta>360){
+    box.style.display='block'; box.style.borderColor='var(--rojo)'; box.style.background='#fde8e8';
+    box.innerHTML = "Escribe un radio y un ángulo válidos (entre 0° y 360°)."; return;
+  }
+  const rad = theta*Math.PI/180;
+  const arco = 3*r*theta/180;
+  const cuerda = 2*r*Math.sin(rad/2);
+  const perimetro = arco + cuerda;
+  const areaSector = 3*r*r*theta/360;
+  const areaTriangulo = 0.5*r*r*Math.sin(rad);
+  const areaSegmento = areaSector - areaTriangulo;
+  box.style.display='block'; box.style.borderColor='var(--verde)'; box.style.background='#eafaf1';
+  box.innerHTML = `Arco = <strong>${arco.toFixed(2)} cm</strong><br>Cuerda = <strong>${cuerda.toFixed(2)} cm</strong><br>Perímetro = <strong>${perimetro.toFixed(2)} cm</strong><br>Área sector = ${areaSector.toFixed(2)} cm² | Área triángulo = ${areaTriangulo.toFixed(2)} cm²<br>Área segmento = <strong>${areaSegmento.toFixed(2)} cm²</strong>`;
+  beep(true);
+}
+
+function calcularCilindro(){
+  const r = parseFloat(document.getElementById('cil-r').value);
+  const h = parseFloat(document.getElementById('cil-h').value);
+  const box = document.getElementById('cil-resultado');
+  if(isNaN(r) || isNaN(h) || r<=0 || h<=0){
+    box.style.display='block'; box.style.borderColor='var(--rojo)'; box.style.background='#fde8e8';
+    box.innerHTML = "Escribe un radio y una altura válidos."; return;
+  }
+  const volumen = 3*r*r*h;
+  const superficie = 2*3*r*(r+h);
+  box.style.display='block'; box.style.borderColor='var(--verde)'; box.style.background='#eafaf1';
+  box.innerHTML = `Volumen = <strong>${volumen.toFixed(2)} cm³</strong><br>Superficie total = <strong>${superficie.toFixed(2)} cm²</strong>`;
+  beep(true);
+}
+
+function calcularCono(){
+  const r = parseFloat(document.getElementById('con-r').value);
+  const h = parseFloat(document.getElementById('con-h').value);
+  const box = document.getElementById('con-resultado');
+  if(isNaN(r) || isNaN(h) || r<=0 || h<=0){
+    box.style.display='block'; box.style.borderColor='var(--rojo)'; box.style.background='#fde8e8';
+    box.innerHTML = "Escribe un radio y una altura válidos."; return;
+  }
+  const g = Math.sqrt(r*r+h*h);
+  const volumen = (3*r*r*h)/3;
+  const superficie = 3*r*(r+g);
+  box.style.display='block'; box.style.borderColor='var(--verde)'; box.style.background='#eafaf1';
+  box.innerHTML = `Generatriz (g) = <strong>${g.toFixed(2)} cm</strong><br>Volumen = <strong>${volumen.toFixed(2)} cm³</strong><br>Superficie total = <strong>${superficie.toFixed(2)} cm²</strong>`;
+  beep(true);
+}
+
+function corregirTest(){
+  const preguntas = ['t1','t2','t3','t4','t5','t6','t7','t8','t9','t10'];
+  let correctas = 0; let respondidas = 0;
+  preguntas.forEach(p=>{
+    const opciones = document.querySelectorAll(`input[name="${p}"]`);
+    const contenedor = opciones[0].closest('.opciones');
+    const correctIndex = contenedor.dataset.correct;
+    let elegido = null;
+    opciones.forEach(o=>{ if(o.checked) elegido = o.value; });
+    if(elegido!==null) respondidas++;
+    contenedor.querySelectorAll('label').forEach((label,idx)=>{
+      label.classList.remove('correcta','incorrecta');
+      if(String(idx)===correctIndex) label.classList.add('correcta');
+      else if(elegido===String(idx)) label.classList.add('incorrecta');
+    });
+    if(elegido===correctIndex) correctas++;
+  });
+  document.getElementById('testProgress').style.width = (respondidas*10)+"%";
+  const nota = 1.0 + (correctas/10)*6.0;
+  const resultadoBox = document.getElementById('testResultado');
+  resultadoBox.style.display='block';
+  document.getElementById('puntajeTexto').textContent = `${correctas} de 10 correctas (${respondidas} de 10 respondidas)`;
+  document.getElementById('notaGrande').textContent = nota.toFixed(1);
+  let mensaje = ""; let color = "";
+  if(nota>=6.0){ mensaje="Muy buen resultado en los dos temas."; color="#eafaf1"; }
+  else if(nota>=5.0){ mensaje="Buen resultado. Con un poco más de práctica lo tendrás completo."; color="#fff8e1"; }
+  else if(nota>=4.0){ mensaje="Vas bien. Repasa las fórmulas antes de la prueba."; color="#fff3e0"; }
+  else{ mensaje="Conviene repasar con calma las secciones de teoría otra vez."; color="#fde8e8"; }
+  resultadoBox.style.background = color;
+  document.getElementById('mensajeFinal').textContent = mensaje;
+  beep(nota>=4.0);
+  resultadoBox.scrollIntoView({behavior:'smooth', block:'center'});
+}
+</script>
+
+</body>
+</html>
